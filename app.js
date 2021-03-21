@@ -5,12 +5,15 @@ var path = require("path")
 var bodyParser = require('body-parser');
 var mysql = require('mysql');
 
+var dotenv = require("dotenv")
+dotenv.config()
+
 
 var con = mysql.createConnection({
-    host: "mysql.ct8.pl",
-    user: "m22185_root",
-    password: "zaq1@WSX",
-    database: "m22185_chinczyk"
+    host: process.env.HOST,
+    user: process.env.USER,
+    password: process.env.PASSWORD,
+    database: process.env.DATABASE
 });
 
 app.use(bodyParser.urlencoded({ extended: true }))
