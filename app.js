@@ -11,9 +11,13 @@ dotenv.config()
 
 var con = mysql.createConnection({
     host: process.env.HOST,
-    user: process.env.USER,
+    user: process.env.USERLOGIN,
     password: process.env.PASSWORD,
     database: process.env.DATABASE
+});
+
+con.connect(function (err) {
+    if (err) throw err;
 });
 
 app.use(bodyParser.urlencoded({ extended: true }))
@@ -24,7 +28,7 @@ app.get("/", function (req, res) {
 
 })
 
-app.post("/login", function (req, res) {
+app.post("/login", async function (req, res) {
     console.log(req.body.name)
     let login = req.body.name
 
@@ -35,22 +39,21 @@ app.post("/login", function (req, res) {
     //     addToLastGame(login)
     // }
 
-    let thisLoginGame = getLastRecord()
+    let thisLoginGame = await getLastRecord()
+    console.log(thisLoginGame)
 
     res.send(JSON.stringify(thisLoginGame))
 
 })
 
 function getLastRecord() {
-
-    console.log("testowanbie")
-    con.connect(function (err) {
-        if (err) throw err;
-        con.query("SELECT * FROM games", function (err, result, fields) {
+    return new Promise((resolve, reject) => {
+        con.query("SELECT * FROM games ORDER BY id DESC LIMIT 1", function (err, result, fields) {
             if (err) throw err;
-            console.log(result);
-            return result
-        });
+            result[0].data = JSON.parse(result[0].data)
+            // console.log(result[0]);
+            resolve(result[0])
+        })
     });
 }
 
