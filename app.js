@@ -3,24 +3,15 @@ var app = express()
 const PORT = 3000;
 var path = require("path")
 var bodyParser = require('body-parser');
-var mysql = require('mysql');
 
 var dotenv = require("dotenv")
 dotenv.config()
 
+let Game = require("./serverfiles/game.js")
 
-var con = mysql.createConnection({
-    host: process.env.HOST,
-    user: process.env.USERLOGIN,
-    password: process.env.PASSWORD,
-    database: process.env.DATABASE
-});
+var game = new Game(process.env.HOST, process.env.USERLOGIN, process.env.PASSWORD, process.env.DATABASE)
 
-con.connect(function (err) {
-    if (err) throw err;
-});
-
-app.use(bodyParser.urlencoded({ extended: true }))
+app.use(express.json())
 
 app.get("/", function (req, res) {
     console.log("get")
@@ -29,33 +20,24 @@ app.get("/", function (req, res) {
 })
 
 app.post("/login", async function (req, res) {
-    console.log(req.body.name)
+    console.log(req.body)
     let login = req.body.name
-
-    // let lastRecord = getLastRecord()
-    // if (lastRecord.player4) {
-    //     createNewGame()
-    // } else {
-    //     addToLastGame(login)
-    // }
-
-    let thisLoginGame = await getLastRecord()
-    console.log(thisLoginGame)
-
+    let thisLoginGame = await game.login(login)
     res.send(JSON.stringify(thisLoginGame))
-
 })
 
-function getLastRecord() {
-    return new Promise((resolve, reject) => {
-        con.query("SELECT * FROM games ORDER BY id DESC LIMIT 1", function (err, result, fields) {
-            if (err) throw err;
-            result[0].data = JSON.parse(result[0].data)
-            // console.log(result[0]);
-            resolve(result[0])
-        })
-    });
-}
+app.post("/check", async function (req, res) {
+    let id = req.body.id
+    let userGame = await game.getGameFromId(id)
+    res.send(JSON.stringify(userGame))
+})
+
+app.post("/changeState", async function (req, res) {
+    let id = req.body.id
+    let color = req.body.color
+    let userGame = await game.changeUserReadyState(id, color)
+    res.send(JSON.stringify(userGame))
+})
 
 app.use(express.static("static"))
 
