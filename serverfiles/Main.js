@@ -45,7 +45,6 @@ module.exports = class Main {
             lastActive: null,
             state: 0,
         }
-        let pawns = []
 
         let pawns = [0, 1, 2, 3]
 
