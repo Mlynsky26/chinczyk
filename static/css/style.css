@@ -35,11 +35,36 @@ body{
     margin: 0 30px;
     border-radius: 10px;
     max-width: 200px;
-    overflow: hidden;
+    position: relative;
+}
+
+.counterCircle{
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    position: absolute;
+    top: 0;
+    right: 0;
+    transform: translate(50%, -50%);
+    border: 1px solid black;
+    box-sizing: border-box;
+    text-align: center;
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .me{
     border: 3px solid white
+}
+
+#randomButton{
+    background-color: black;
+    border-radius: 10px;
+    padding: 15px 30px;
+    margin: 0 auto;
+    color: white;
 }
 
 .switchButton{
@@ -64,3 +89,84 @@ body{
     background-color: rgb(181, 255, 32);
     left: 20px;
 }
+
+#board{
+    width: 584px;
+    height: 584px;
+    margin: 30px auto;
+    position: relative;
+}
+
+#board img{
+    width: 584px;
+    height: 584px;
+}
+
+.pawn{
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    position: absolute;
+    transform: translate(-50%, -50%);
+    border: 1px solid black;
+    box-sizing: border-box;
+    text-align: center;
+    z-index: 1;
+}
+
+.hint{
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    position: absolute;
+    transform: translate(-50%, -50%);
+    border: 1px solid black;
+    box-sizing: border-box;
+    text-align: center;
+    background-color: pink;
+}
+
+.activePawn{
+    filter: grayscale(0.5);
+}
+
+.randomNumber{
+    width: 60px;
+    display: block;
+    margin: 0 auto;
+}
+
+
+#finishBoard{
+    font-size: 30px;
+    font-weight: bold;
+    z-index: 10;
+    opacity: 0;
+    transition: all 0.4s ease-in-out;
+    position: absolute;
+    padding: 60px 100px;
+    background-color: rgb(19, 19, 19);
+    /* -webkit-box-shadow: 0px 4px 15px 2px #000000; 
+    box-shadow: 0px 4px 15px 2px #000000; */
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#finishBoard.fade{
+    opacity: 1;
+}
+
+
+/* .pawnRed{
+    transform: translate(-50%, -50%);
+}
+.pawnBlue{
+    transform: translate(50%, -50%);
+}
+.pawnGreen{
+    transform: translate(50%, 50%);
+}
+.pawnYellow{
+    transform: translate(-50%, 50%);
+} */

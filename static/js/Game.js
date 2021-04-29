@@ -1,29 +1,41 @@
+import Player from "./Player.js"
+
 export default class Game {
     constructor() {
+        this.colors = ["blue", "green", "yellow", "red"]
+        this.players = []
+    }
 
+    init(obj) {
+        this.id = obj.id
+        this.started = obj.started == 1
+        this.obj = obj
+        this.me = this.whoIAm()
+        this.ended = false
+        this.generateHeader()
+        this.interval = ""
+        this.startRequestng()
+        if (Object.keys(this.obj.players).length > 3) {
+            this.startGame(obj)
+        }
     }
 
     sendLogin() {
         let name = document.getElementById("loginInput").value
-
-        console.log(name)
-        console.log(this)
         if (name != "" && name.length < 16) {
             this.postData('/login', { name: name })
                 .then(data => {
                     console.log(data);
                     let promptElement = document.getElementById("prompt")
                     promptElement.remove()
-
                     this.init(data)
                 });
         } else {
-            alert("Podaj prawidłowynick")
+            alert("Podaj prawidłowy nick")
         }
     }
 
-
-    async postData(url = '', data = {}) {
+    async postData(url, data = {}) {
         const response = await fetch(url, {
             method: 'POST',
             headers: {
@@ -34,23 +46,10 @@ export default class Game {
         return response.json();
     }
 
-
-    init(obj) {
-        this.id = obj.id
-        this.started = obj.started == 1
-        this.obj = obj
-        this.me = this.whoIAm()
-        this.generateHeader()
-        this.interval = ""
-        this.startRequestng()
-    }
-
-
     whoIAm() {
         let me
         for (let key in this.obj.players)
             me = key
-
         return me
     }
 
@@ -70,42 +69,49 @@ export default class Game {
             switchButton.appendChild(dot)
             header.appendChild(switchButton)
         }
-        for (let key in this.obj.players) {
-            let div = document.createElement("div")
-            div.className = "playerNick"
-            div.id = key + "player"
-            if (key == this.me) {
-                div.classList.add("me")
-            }
-            div.style.backgroundColor = key
-            div.innerText = this.obj.players[key].nick
-            header.appendChild(div)
-        }
-
         document.body.appendChild(header)
+        for (let key in this.obj.players) {
+            this.addUser(this.obj, key)
+        }
     }
 
-    removeSwitch(data) {
-        if (!this.started && data.started == 1) {
-            let btn = document.getElementsByClassName("switchButton")[0]
+    removeSwitch() {
+        let btn = document.getElementsByClassName("switchButton")[0]
+        if (btn)
             btn.remove()
-        }
     }
 
-    addUsers(data) {
-        for (let key in data.players) {
-            if (this.obj.players[key] == undefined) {
-                let header = document.getElementsByClassName("header")[0]
-                let div = document.createElement("div")
-                div.className = "playerNick"
-                div.id = key + "player"
-                div.style.backgroundColor = key
-                div.innerText = data.players[key].nick
-                header.appendChild(div)
-            }
-        }
+    startGame(data) {
+        this.obj = data
+        this.started = true
+        this.removeSwitch()
+        this.createBoard()
+        this.players[0].addCounter()
+
+        this.players.forEach(player => {
+            player.setState(data.players)
+            player.checkToAddButton()
+        })
+    }
+
+    createBoard() {
+        let board = document.createElement("div")
+        board.id = "board"
+        let img = document.createElement("img")
+        img.src = "gfx/board.png"
+        board.appendChild(img)
+        document.body.appendChild(board)
+
+        this.players.forEach(player => player.addPawns())
+
+    }
 
 
+    addUser(data, color) {
+        if (color == "unknown")
+            color = Object.keys(data.players)[Object.keys(data.players).length - 1]
+
+        this.players.push(new Player(this, data, color))
     }
 
     changeReadyState() {
@@ -123,11 +129,30 @@ export default class Game {
         }
     }
 
+    finishGame(color, nick) {
+        this.ended = true
+        clearInterval(this.interval)
+        this.players.forEach(player => {
+            player.removeCounter()
+            if (player.button)
+                player.button.remove()
+        })
+
+        let finishBoard = document.createElement("div")
+        finishBoard.id = "finishBoard"
+        finishBoard.style.boxShadow = `0px 4px 15px 2px #000000, inset 0px 0px 12px 2px ${color}`
+
+        finishBoard.innerText = "Wygrał " + nick
+        finishBoard.style.color = color
+        document.body.appendChild(finishBoard)
+        finishBoard.classList.add("fade")
+
+    }
+
     startRequestng() {
         this.interval = setInterval(() => {
             this.postData('/check', { id: this.id })
                 .then(data => {
-                    // console.log(data);
                     this.update(data)
                 });
         }, 1000)
@@ -135,16 +160,20 @@ export default class Game {
 
     update(data) {
         if (JSON.stringify(data) != JSON.stringify(this.obj)) {
-            console.log("zmiana")
-            this.removeSwitch(data)
-            this.addUsers(data)
+            if (Object.keys(data.players).length > Object.keys(this.obj.players).length) {
+                this.addUser(data, "unknown")
+            }
+
+            if (!this.started && data.started == 1) {
+                this.startGame(data)
+            }
 
             this.obj = data
-            this.started = this.obj.started == 1
 
             if (this.started) {
-                console.log("sstarted")
+                this.players.forEach(player => player.update(data))
             }
+            // console.log("data", data)
         }
     }
 }
