@@ -47,11 +47,7 @@ module.exports = class Main {
         }
         let pawns = []
 
-        for (let i = 0; i < 4; i++) {
-            pawns.push(Math.floor(Math.random() * 10) + 37)
-        }
-
-        // let pawns = [0, 1, 2, 3]
+        let pawns = [0, 1, 2, 3]
 
         lastGame.players[color] = player
         lastGame.pawns[color] = pawns
@@ -144,7 +140,6 @@ module.exports = class Main {
 
         if (finished) {
             userGame.players[color].state = 6
-            console.log("skonczyl")
         } else {
             userGame.players[color].state = 3
         }
@@ -189,7 +184,6 @@ module.exports = class Main {
                     userGame.pawns[key].forEach((pawn, i) => {
                         let fieldToCheck = this.getAbsolutePosition(pawn, key)
                         if (field == fieldToCheck && pawn < 44) {
-                            console.log("zbiajnie ", key, pawn)
                             userGame.pawns[key][i] = i
                         }
                     })

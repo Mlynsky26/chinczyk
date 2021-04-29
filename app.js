@@ -13,13 +13,10 @@ var main = new Main(process.env.HOST, process.env.USERLOGIN, process.env.PASSWOR
 app.use(express.json())
 
 app.get("/", function (req, res) {
-    console.log("get")
     res.sendFile(path.join(__dirname + "/static/index.html"))
-
 })
 
 app.post("/login", async function (req, res) {
-    console.log(req.body)
     let login = req.body.name
     let thisLoginGame = await main.login(login)
     res.send(JSON.stringify(thisLoginGame))
